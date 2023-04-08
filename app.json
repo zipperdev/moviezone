@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "moviezone",
+    "slug": "moviezone",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  },
+  "name": "moviezone"
+}
