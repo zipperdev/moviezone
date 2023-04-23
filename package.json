@@ -3,20 +3,40 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "expo start --dev-client",
-    "android": "expo run:android",
-    "ios": "expo run:ios",
+    "start": "react-native start",
+    "start:reset": "watchman watch-del-all & react-native start --reset-cache",
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
     "web": "expo start --web"
   },
   "dependencies": {
+    "@expo/metro-config": "^0.7.1",
+    "@expo/vector-icons": "^13.0.0",
+    "@react-navigation/bottom-tabs": "^6.5.7",
+    "@react-navigation/native": "^6.1.6",
+    "@react-navigation/native-stack": "^6.9.12",
     "expo": "~48.0.10",
+    "expo-asset": "~8.9.1",
+    "expo-font": "~11.1.1",
     "expo-splash-screen": "~0.18.1",
     "expo-status-bar": "~1.4.4",
     "react": "18.2.0",
-    "react-native": "0.71.6"
+    "react-native": "0.71.6",
+    "react-native-safe-area-context": "4.5.0",
+    "react-native-screens": "~3.20.0",
+    "react-native-web-swiper": "^2.2.4",
+    "react-query": "^3.39.3",
+    "styled-components": "^5.3.9"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0"
+    "@babel/core": "^7.20.0",
+    "@tsconfig/react-native": "^2.0.3",
+    "@types/jest": "^29.5.0",
+    "@types/react": "^18.0.35",
+    "@types/react-test-renderer": "^18.0.0",
+    "@types/styled-components": "^5.1.26",
+    "@types/styled-components-react-native": "^5.2.1",
+    "typescript": "^5.0.4"
   },
   "private": true
 }
