@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Dimensions, FlatList } from "react-native";
 import { useQuery, useQueryClient } from "react-query";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -17,6 +17,7 @@ const SCREEN_HEIGHT = Dimensions.get("window").height;
 
 function Movies({}: Props): JSX.Element {
     const queryClient = useQueryClient();
+    const [refreshing, setRefreshing] = useState(false);
     const nowPlayingResult = useQuery<MoviesResponse>(
         ["movies", "nowPlaying"],
         fetchers.movies.nowPlaying
@@ -34,13 +35,11 @@ function Movies({}: Props): JSX.Element {
         nowPlayingResult.isLoading ||
         trendingResult.isLoading ||
         upcomingResult.isLoading;
-    const refreshing =
-        nowPlayingResult.isRefetching ||
-        trendingResult.isRefetching ||
-        upcomingResult.isRefetching;
 
     const onRefresh = () => {
+        setRefreshing(true);
         queryClient.refetchQueries(["movies"]);
+        setRefreshing(false);
     };
     const extractListKey = (item: Movie) => String(item.id);
     const renderUpcomingMovie = ({ item }: { item: Movie }) => (

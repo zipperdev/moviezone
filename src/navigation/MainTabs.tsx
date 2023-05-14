@@ -42,6 +42,7 @@ function MainTabs(): JSX.Element {
         tabBarInactiveTintColor: isDarkMode
             ? darkColors.inactive
             : lightColors.inactive,
+        tabBarHideOnKeyboard: true,
         tabBarLabelStyle: {
             marginTop: -8,
             marginBottom: 7,

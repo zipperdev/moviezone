@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { RefreshControl, ScrollView } from "react-native";
 import { useQuery, useQueryClient } from "react-query";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -11,6 +11,7 @@ type Props = NativeStackScreenProps<any, "TvShows">;
 
 function TvShows({}: Props): JSX.Element {
     const queryClient = useQueryClient();
+    const [refreshing, setRefreshing] = useState(false);
     const airingTodayResult = useQuery<TvShowsResponse>(
         ["tv", "airingToday"],
         fetchers.tvShows.airingToday
@@ -28,13 +29,11 @@ function TvShows({}: Props): JSX.Element {
         airingTodayResult.isLoading ||
         topRatedResult.isLoading ||
         trendingResult.isLoading;
-    const refreshing =
-        airingTodayResult.isRefetching ||
-        topRatedResult.isRefetching ||
-        trendingResult.isRefetching;
 
-    const onRefresh = () => {
-        queryClient.refetchQueries(["tv"]);
+    const onRefresh = async () => {
+        setRefreshing(true);
+        await queryClient.refetchQueries(["tv"]);
+        setRefreshing(false);
     };
 
     if (loading) return <Loading />;

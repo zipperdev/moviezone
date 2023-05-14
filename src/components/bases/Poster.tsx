@@ -6,11 +6,16 @@ interface Props {
     path: string | null;
 }
 
-const PosterImage = styled.Image`
+const Container = styled.View`
     width: 95px;
     border-radius: 6px;
     aspect-ratio: 2/3;
     background-color: ${(props) => props.theme.secondary};
+`;
+
+const PosterImage = styled.Image`
+    flex: 1;
+    border-radius: 6px;
 `;
 
 function Poster({ path }: Props): JSX.Element {
@@ -20,7 +25,11 @@ function Poster({ path }: Props): JSX.Element {
           }
         : require("../../assets/blank.png");
 
-    return <PosterImage resizeMode="cover" source={source} />;
+    return (
+        <Container>
+            <PosterImage resizeMode="cover" source={source} />
+        </Container>
+    );
 }
 
 export default Poster;
