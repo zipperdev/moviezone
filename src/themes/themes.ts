@@ -1,4 +1,5 @@
 import { Theme } from "@react-navigation/native";
+import { DefaultTheme } from "styled-components";
 import { darkColors, lightColors } from "./colors";
 
 export const navLightTheme: Theme = {
@@ -25,7 +26,7 @@ export const navDarkTheme: Theme = {
     },
 };
 
-export const styledLightTheme = {
+export const styledLightTheme: DefaultTheme = {
     isDarkMode: false,
     background: lightColors.background,
     text: lightColors.text,
@@ -35,7 +36,7 @@ export const styledLightTheme = {
     inactive: lightColors.inactive,
 };
 
-export const styledDarkTheme = {
+export const styledDarkTheme: DefaultTheme = {
     isDarkMode: true,
     background: darkColors.background,
     text: darkColors.text,
