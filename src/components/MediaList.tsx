@@ -1,13 +1,18 @@
 import React from "react";
+import { InfiniteData } from "react-query";
 import { FlatList } from "react-native";
 import styled from "styled-components/native";
-import { Movie, TvShow } from "../api/types";
+import { Movie, MoviesResponse, TvShow, TvShowsResponse } from "../api/types";
 import { HorizontalSeparator } from "./shared";
 import VerticalMedia from "./VerticalMedia";
+import Loading from "./Loading";
 
 interface Props {
     title: string;
-    data?: Movie[] | TvShow[];
+    data?: InfiniteData<MoviesResponse | TvShowsResponse>;
+    hasNextPage?: boolean;
+    fetchNextPage?: () => unknown;
+    isFetchingNextPage?: boolean;
 }
 
 const Container = styled.View`
@@ -22,14 +27,22 @@ const Title = styled.Text`
     color: ${(props) => props.theme.text};
 `;
 
-function MediaList({ title, data }: Props): JSX.Element {
-    const extractListKey = (item: Movie | TvShow) => String(item.id);
+function MediaList({
+    title,
+    data,
+    hasNextPage,
+    fetchNextPage = () => {},
+    isFetchingNextPage,
+}: Props): JSX.Element {
+    const onEndReached = () => {
+        if (hasNextPage) {
+            fetchNextPage();
+        }
+    };
+    const extractListKey = (item: Movie | TvShow, index: number) =>
+        item.id + index.toString();
     const renderListItem = ({ item }: { item: Movie | TvShow }) => (
-        <VerticalMedia
-            title={"name" in item ? item.name : item.title}
-            voteAverage={item.vote_average}
-            posterPath={item.poster_path}
-        />
+        <VerticalMedia data={item} />
     );
 
     return (
@@ -38,10 +51,25 @@ function MediaList({ title, data }: Props): JSX.Element {
             {data ? (
                 <FlatList
                     horizontal
+                    onEndReached={onEndReached}
+                    onEndReachedThreshold={2}
+                    removeClippedSubviews
+                    disableVirtualization={false}
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={{ paddingHorizontal: 20 }}
+                    ListFooterComponent={() =>
+                        isFetchingNextPage ? (
+                            <Loading
+                                containerStyle={{
+                                    marginBottom: 10,
+                                    marginLeft: 18,
+                                    marginRight: -4,
+                                }}
+                            />
+                        ) : null
+                    }
+                    data={data.pages?.map((page) => page.results).flat()}
                     keyExtractor={extractListKey}
-                    data={data}
                     renderItem={renderListItem}
                     ItemSeparatorComponent={HorizontalSeparator}
                 />

@@ -3,16 +3,18 @@ import { Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import styled, { css } from "styled-components/native";
 import { darkColors } from "../../themes/colors";
+import parseVotes from "../../functions/parseVotes";
 
 interface Props {
     isPale?: boolean;
+    isCenter?: boolean;
     voteAverage: number;
 }
 
-const VotesContent = styled.View<{ isPale: boolean }>`
+const VotesContent = styled.View<{ isPale: boolean; isCenter: boolean }>`
     border-radius: 4px;
     ${(props) =>
-        props.isPale &&
+        !props.isCenter &&
         css`
             align-self: flex-start;
         `}
@@ -31,12 +33,15 @@ const VotesText = styled.Text<{ isPale: boolean }>`
         props.isPale ? props.theme.secondary : darkColors.secondary};
 `;
 
-function Votes({ isPale = false, voteAverage }: Props): JSX.Element {
-    const votes =
-        (voteAverage > 0 ? parseFloat(voteAverage.toFixed(1)) : "?") + "/10";
+function Votes({
+    isPale = false,
+    isCenter = false,
+    voteAverage,
+}: Props): JSX.Element {
+    const votes = parseVotes(voteAverage);
 
     return (
-        <VotesContent isPale={isPale}>
+        <VotesContent isPale={isPale} isCenter={isCenter}>
             <VotesText isPale={isPale}>
                 <Ionicons name="star-sharp" size={14} />
                 <Text>{" " + votes}</Text>

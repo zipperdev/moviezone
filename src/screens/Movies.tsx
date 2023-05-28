@@ -1,17 +1,18 @@
 import React, { useState } from "react";
 import { Dimensions, FlatList } from "react-native";
-import { useQuery, useQueryClient } from "react-query";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useInfiniteQuery, useQuery, useQueryClient } from "react-query";
 import Swiper from "react-native-web-swiper";
 import Slide from "../components/Slide";
 import Loading from "../components/Loading";
 import HorizontalMedia from "../components/HorizontalMedia";
 import MediaList from "../components/MediaList";
 import { VerticalSeparator } from "../components/shared";
+import getNextPageParam from "../functions/getNextPageParam";
+import { TabsScreenProps } from "../navigation/types";
 import { Movie, MoviesResponse } from "../api/types";
 import fetchers from "../api/fetchers";
 
-type Props = NativeStackScreenProps<any, "Movies">;
+type Props = TabsScreenProps<"Movies">;
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 
@@ -22,13 +23,15 @@ function Movies({}: Props): JSX.Element {
         ["movies", "nowPlaying"],
         fetchers.movies.nowPlaying
     );
-    const trendingResult = useQuery<MoviesResponse>(
+    const trendingResult = useInfiniteQuery<MoviesResponse>(
         ["movies", "trending"],
-        fetchers.movies.trending
+        fetchers.movies.trending,
+        { getNextPageParam }
     );
-    const upcomingResult = useQuery<MoviesResponse>(
+    const upcomingResult = useInfiniteQuery<MoviesResponse>(
         ["movies", "upcoming"],
-        fetchers.movies.upcoming
+        fetchers.movies.upcoming,
+        { getNextPageParam }
     );
 
     const loading =
@@ -41,14 +44,43 @@ function Movies({}: Props): JSX.Element {
         queryClient.refetchQueries(["movies"]);
         setRefreshing(false);
     };
+    const onEndReached = () => {
+        if (upcomingResult.hasNextPage) {
+            upcomingResult.fetchNextPage();
+        }
+    };
     const extractListKey = (item: Movie) => String(item.id);
+    function renderListHeaderComponent() {
+        return (
+            <>
+                <Swiper
+                    loop
+                    timeout={6}
+                    controlsEnabled={false}
+                    springConfig={{ tension: 50, friction: 50 }}
+                    containerStyle={{
+                        marginBottom: 5,
+                        width: "100%",
+                        height: SCREEN_HEIGHT / 3.5,
+                    }}
+                >
+                    {nowPlayingResult.data?.results.map((movie) => (
+                        <Slide key={movie.id} data={movie} />
+                    ))}
+                </Swiper>
+                <MediaList
+                    title="유행중인 영화"
+                    data={trendingResult.data}
+                    hasNextPage={trendingResult.hasNextPage}
+                    fetchNextPage={trendingResult.fetchNextPage}
+                    isFetchingNextPage={trendingResult.isFetchingNextPage}
+                />
+                <MediaList title="곧 개봉하는 영화" />
+            </>
+        );
+    }
     const renderUpcomingMovie = ({ item }: { item: Movie }) => (
-        <HorizontalMedia
-            title={item.title}
-            overview={item.overview}
-            releaseDate={item.release_date}
-            posterPath={item.poster_path}
-        />
+        <HorizontalMedia data={item} />
     );
 
     if (loading) return <Loading />;
@@ -56,40 +88,25 @@ function Movies({}: Props): JSX.Element {
         <FlatList
             refreshing={refreshing}
             onRefresh={onRefresh}
+            onEndReached={onEndReached}
+            removeClippedSubviews
+            onEndReachedThreshold={2}
+            disableVirtualization={false}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 25 }}
-            ListHeaderComponent={() => (
-                <>
-                    <Swiper
-                        loop
-                        timeout={6}
-                        controlsEnabled={false}
-                        springConfig={{ tension: 50, friction: 50 }}
-                        containerStyle={{
-                            marginBottom: 5,
-                            width: "100%",
-                            height: SCREEN_HEIGHT / 3.5,
-                        }}
-                    >
-                        {nowPlayingResult.data?.results.map((movie) => (
-                            <Slide
-                                key={movie.id}
-                                title={movie.title}
-                                overview={movie.overview}
-                                voteAverage={movie.vote_average}
-                                backdropPath={movie.backdrop_path}
-                                posterPath={movie.poster_path}
-                            />
-                        ))}
-                    </Swiper>
-                    <MediaList
-                        title="유행중인 영화"
-                        data={trendingResult.data?.results}
+            ListHeaderComponent={renderListHeaderComponent()}
+            ListFooterComponent={() =>
+                upcomingResult.isFetchingNextPage ? (
+                    <Loading
+                        containerStyle={{ marginTop: 10, marginBottom: -5 }}
                     />
-                    <MediaList title="곧 개봉하는 영화" />
-                </>
-            )}
-            data={upcomingResult.data?.results}
+                ) : null
+            }
+            data={upcomingResult.data?.pages.map((page) => page.results).flat()}
+            /** 
+                pages.map(page => page.results) => [ [Movie, Movie], [Movie, Movie, Movie] ]
+                pages.map(page => page.results).flat() => [ Movie, Movie, Movie, Movie, Movie ]
+            */
             keyExtractor={extractListKey}
             renderItem={renderUpcomingMovie}
             ItemSeparatorComponent={VerticalSeparator}

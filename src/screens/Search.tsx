@@ -1,12 +1,14 @@
 import React, { useState } from "react";
-import { useQuery } from "react-query";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useInfiniteQuery } from "react-query";
 import styled, { useTheme } from "styled-components/native";
 import Loading from "../components/Loading";
-import fetchers from "../api/fetchers";
 import MediaList from "../components/MediaList";
+import { TabsScreenProps } from "../navigation/types";
+import getNextPageParam from "../functions/getNextPageParam";
+import { MoviesResponse, TvShowsResponse } from "../api/types";
+import fetchers from "../api/fetchers";
 
-type Props = NativeStackScreenProps<any, "Search">;
+type Props = TabsScreenProps<"Search">;
 
 const ScrollContainer = styled.ScrollView``;
 
@@ -25,23 +27,26 @@ const NotifyText = styled.Text`
     font-weight: 600;
     text-align: center;
     color: ${(props) => props.theme.accent};
+    opacity: 0.9;
 `;
 
 function Search({}: Props): JSX.Element {
     const theme = useTheme();
     const [query, setQuery] = useState("");
-    const searchMoviesResult = useQuery(
+    const searchMoviesResult = useInfiniteQuery<MoviesResponse>(
         ["searchMovies", query],
         fetchers.movies.search,
         {
             enabled: false,
+            getNextPageParam,
         }
     );
-    const searchTvShowsResult = useQuery(
+    const searchTvShowsResult = useInfiniteQuery<TvShowsResponse>(
         ["searchTvShows", query],
         fetchers.tvShows.search,
         {
             enabled: false,
+            getNextPageParam,
         }
     );
 
@@ -53,10 +58,6 @@ function Search({}: Props): JSX.Element {
         if (query === "") return;
         searchMoviesResult.refetch();
         searchTvShowsResult.refetch();
-        console.log(
-            searchMoviesResult.data?.results.length,
-            searchTvShowsResult.data
-        );
     };
 
     return (
@@ -72,7 +73,7 @@ function Search({}: Props): JSX.Element {
                 onChangeText={onChangeText}
                 onSubmitEditing={onSubmit}
             />
-            {loading ? <Loading /> : null}
+            {loading ? <Loading containerStyle={{ marginTop: 30 }} /> : null}
             {!loading &&
             (!searchMoviesResult.data || !searchTvShowsResult.data) ? (
                 <NotifyText style={{ marginTop: 40 }}>
@@ -82,16 +83,26 @@ function Search({}: Props): JSX.Element {
                 <>
                     <MediaList
                         title="영화"
-                        data={searchMoviesResult.data?.results}
+                        data={searchMoviesResult.data}
+                        hasNextPage={searchMoviesResult.hasNextPage}
+                        fetchNextPage={searchMoviesResult.fetchNextPage}
+                        isFetchingNextPage={
+                            searchMoviesResult.isFetchingNextPage
+                        }
                     />
-                    {!searchMoviesResult.data?.results[0] ? (
+                    {!searchMoviesResult.data?.pages[0].results[0] ? (
                         <NotifyText>검색한 영화가 없어요</NotifyText>
                     ) : null}
                     <MediaList
                         title="TV 쇼"
-                        data={searchTvShowsResult.data?.results}
+                        data={searchTvShowsResult.data}
+                        hasNextPage={searchTvShowsResult.hasNextPage}
+                        fetchNextPage={searchTvShowsResult.fetchNextPage}
+                        isFetchingNextPage={
+                            searchTvShowsResult.isFetchingNextPage
+                        }
                     />
-                    {!searchTvShowsResult.data?.results[0] ? (
+                    {!searchTvShowsResult.data?.pages[0].results[0] ? (
                         <NotifyText>검색한 TV 쇼가 없어요</NotifyText>
                     ) : null}
                 </>

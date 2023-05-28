@@ -1,21 +1,15 @@
 import React from "react";
-import { Text } from "react-native";
 import {
     NativeStackNavigationOptions,
     createNativeStackNavigator,
 } from "@react-navigation/native-stack";
-import { Container } from "../components/shared";
+import Detail from "../screens/Detail";
+import { MainStackParamList, RootScreenProps } from "./types";
 
-const newScreen = (title: string) => (): JSX.Element =>
-    (
-        <Container>
-            <Text>{title}</Text>
-        </Container>
-    );
+type Props = RootScreenProps<"Stack">;
+const NativeStack = createNativeStackNavigator<MainStackParamList>();
 
-const NativeStack = createNativeStackNavigator();
-
-function MainStack(): JSX.Element {
+function MainStack({}: Props): JSX.Element {
     const screenOptions: NativeStackNavigationOptions = {
         headerTitleAlign: "center",
         headerShadowVisible: false,
@@ -24,9 +18,7 @@ function MainStack(): JSX.Element {
 
     return (
         <NativeStack.Navigator screenOptions={screenOptions}>
-            <NativeStack.Screen name="One" component={newScreen("One")} />
-            <NativeStack.Screen name="Two" component={newScreen("Two")} />
-            <NativeStack.Screen name="Three" component={newScreen("Three")} />
+            <NativeStack.Screen name="Detail" component={Detail} />
         </NativeStack.Navigator>
     );
 }

@@ -5,8 +5,9 @@ import {
 } from "@react-navigation/native-stack";
 import MainTabs from "./MainTabs";
 import MainStack from "./MainStack";
+import { RootStackParamList } from "./types";
 
-const NativeStack = createNativeStackNavigator();
+const NativeStack = createNativeStackNavigator<RootStackParamList>();
 
 function RootStack(): JSX.Element {
     const screenOptions: NativeStackNavigationOptions = {

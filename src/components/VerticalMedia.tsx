@@ -1,14 +1,13 @@
 import React from "react";
+import { TouchableOpacity } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import styled from "styled-components/native";
-import ReleaseDate from "./bases/ReleaseDate";
+import { Movie, TvShow } from "../api/types";
 import Poster from "./bases/Poster";
 import Votes from "./bases/Votes";
 
 interface Props {
-    title: string;
-    voteAverage?: number;
-    releaseDate?: string;
-    posterPath: string | null;
+    data: Movie | TvShow;
 }
 
 const Container = styled.View`
@@ -23,23 +22,27 @@ const Title = styled.Text`
     color: ${(props) => props.theme.text};
 `;
 
-function VerticalMedia({
-    title,
-    voteAverage,
-    releaseDate,
-    posterPath,
-}: Props): JSX.Element {
+function VerticalMedia({ data }: Props): JSX.Element {
+    const navigation = useNavigation();
+    const title = "name" in data ? data.name : data.title;
+
+    const navigateToDetail = () =>
+        navigation.navigate("Stack", {
+            screen: "Detail",
+            params: {
+                ...data,
+            },
+        });
+
     return (
-        <Container>
-            <Poster path={posterPath} />
-            <Title numberOfLines={1}>{title}</Title>
-            {voteAverage ? (
-                <Votes voteAverage={voteAverage} />
-            ) : releaseDate ? (
-                <ReleaseDate releaseDate={releaseDate} />
-            ) : null}
-        </Container>
+        <TouchableOpacity activeOpacity={0.6} onPress={navigateToDetail}>
+            <Container>
+                <Poster path={data.poster_path} />
+                <Title numberOfLines={1}>{title}</Title>
+                <Votes voteAverage={data.vote_average} isCenter />
+            </Container>
+        </TouchableOpacity>
     );
 }
 
-export default VerticalMedia;
+export default React.memo(VerticalMedia);

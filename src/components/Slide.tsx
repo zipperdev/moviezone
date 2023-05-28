@@ -1,16 +1,14 @@
 import React from "react";
-import { Dimensions } from "react-native";
+import { Dimensions, TouchableWithoutFeedback } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import styled from "styled-components/native";
-import makeImgPath from "../functions/makeImgPath";
+import makePreservedSrc from "../functions/makePreservedSrc";
+import { Movie } from "../api/types";
 import Poster from "./bases/Poster";
 import Votes from "./bases/Votes";
 
 interface Props {
-    title: string;
-    overview: string;
-    voteAverage: number;
-    backdropPath: string | null;
-    posterPath: string | null;
+    data: Movie;
 }
 
 const Container = styled.View`
@@ -60,35 +58,38 @@ const BackgroundImageFilter = styled.View`
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
-function Slide({
-    title,
-    overview,
-    voteAverage,
-    backdropPath,
-    posterPath,
-}: Props): JSX.Element {
-    const source = backdropPath
-        ? {
-              uri: makeImgPath(backdropPath),
-          }
-        : require("../assets/blank.png");
+function Slide({ data }: Props): JSX.Element {
+    const navigation = useNavigation();
+    const source = makePreservedSrc(data.backdrop_path);
+
+    const navigateToDetail = () =>
+        navigation.navigate("Stack", {
+            screen: "Detail",
+            params: {
+                ...data,
+            },
+        });
 
     return (
-        <Container>
-            <BackgroundImg blurRadius={4} source={source}>
-                <BackgroundImageFilter />
-            </BackgroundImg>
-            <Wrapper>
-                <Poster path={posterPath} />
-                <WrapperContent>
-                    <Header>
-                        <Title screenWidth={SCREEN_WIDTH}>{title}</Title>
-                        <Votes isPale voteAverage={voteAverage} />
-                    </Header>
-                    <Overview numberOfLines={4}>{overview}</Overview>
-                </WrapperContent>
-            </Wrapper>
-        </Container>
+        <TouchableWithoutFeedback onPress={navigateToDetail}>
+            <Container>
+                <BackgroundImg blurRadius={5} source={source}>
+                    <BackgroundImageFilter />
+                </BackgroundImg>
+                <Wrapper>
+                    <Poster path={data.poster_path} />
+                    <WrapperContent>
+                        <Header>
+                            <Title screenWidth={SCREEN_WIDTH}>
+                                {data.title}
+                            </Title>
+                            <Votes isPale voteAverage={data.vote_average} />
+                        </Header>
+                        <Overview numberOfLines={4}>{data.overview}</Overview>
+                    </WrapperContent>
+                </Wrapper>
+            </Container>
+        </TouchableWithoutFeedback>
     );
 }
 

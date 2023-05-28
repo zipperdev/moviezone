@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components/native";
-import makeImgPath from "../../functions/makeImgPath";
+import makePreservedSrc from "../../functions/makePreservedSrc";
 
 interface Props {
     path: string | null;
@@ -19,11 +19,7 @@ const PosterImage = styled.Image`
 `;
 
 function Poster({ path }: Props): JSX.Element {
-    const source = path
-        ? {
-              uri: makeImgPath(path),
-          }
-        : require("../../assets/blank.png");
+    const source = makePreservedSrc(path);
 
     return (
         <Container>

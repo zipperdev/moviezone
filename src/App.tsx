@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { QueryClientProvider } from "react-query";
 import { NavigationContainer } from "@react-navigation/native";
-import { Ionicons } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { ThemeProvider } from "styled-components/native";
@@ -27,7 +27,7 @@ function App() {
     const preload = async () => {
         try {
             // Preload Assets
-            const fonts = loadFonts([Ionicons.font]);
+            const fonts = loadFonts([Ionicons.font, Feather.font]);
             const images = loadImages([require("./assets/blank.png")]);
             await Promise.all([...fonts, ...images]);
         } catch (e) {

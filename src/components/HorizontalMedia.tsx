@@ -1,15 +1,14 @@
 import React from "react";
+import { TouchableOpacity } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import styled from "styled-components/native";
+import { Movie } from "../api/types";
 import ReleaseDate from "./bases/ReleaseDate";
 import Poster from "./bases/Poster";
 import Votes from "./bases/Votes";
 
 interface Props {
-    title: string;
-    overview: string;
-    voteAverage?: number;
-    releaseDate?: string;
-    posterPath: string | null;
+    data: Movie;
 }
 
 const Container = styled.View`
@@ -38,27 +37,33 @@ const Overview = styled.Text`
     color: ${(props) => props.theme.text + "dd"};
 `;
 
-function HorizontalMedia({
-    title,
-    overview,
-    voteAverage,
-    releaseDate,
-    posterPath,
-}: Props): JSX.Element {
+function HorizontalMedia({ data }: Props): JSX.Element {
+    const navigation = useNavigation();
+
+    const navigateToDetail = () =>
+        navigation.navigate("Stack", {
+            screen: "Detail",
+            params: {
+                ...data,
+            },
+        });
+
     return (
-        <Container>
-            <Poster path={posterPath} />
-            <ContentColumn>
-                <Title numberOfLines={1}>{title}</Title>
-                {voteAverage ? (
-                    <Votes voteAverage={voteAverage} />
-                ) : releaseDate ? (
-                    <ReleaseDate releaseDate={releaseDate} />
-                ) : null}
-                <Overview numberOfLines={4}>{overview}</Overview>
-            </ContentColumn>
-        </Container>
+        <TouchableOpacity activeOpacity={0.6} onPress={navigateToDetail}>
+            <Container>
+                <Poster path={data.poster_path} />
+                <ContentColumn>
+                    <Title numberOfLines={1}>{data.title}</Title>
+                    {data.vote_average ? (
+                        <Votes voteAverage={data.vote_average} />
+                    ) : data.release_date ? (
+                        <ReleaseDate releaseDate={data.release_date} />
+                    ) : null}
+                    <Overview numberOfLines={4}>{data.overview}</Overview>
+                </ContentColumn>
+            </Container>
+        </TouchableOpacity>
     );
 }
 
-export default HorizontalMedia;
+export default React.memo(HorizontalMedia);

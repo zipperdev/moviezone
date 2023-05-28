@@ -1,28 +1,32 @@
 import React, { useState } from "react";
 import { RefreshControl, ScrollView } from "react-native";
-import { useQuery, useQueryClient } from "react-query";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useInfiniteQuery, useQueryClient } from "react-query";
 import Loading from "../components/Loading";
 import MediaList from "../components/MediaList";
+import getNextPageParam from "../functions/getNextPageParam";
+import { TabsScreenProps } from "../navigation/types";
 import { TvShowsResponse } from "../api/types";
 import fetchers from "../api/fetchers";
 
-type Props = NativeStackScreenProps<any, "TvShows">;
+type Props = TabsScreenProps<"TvShows">;
 
 function TvShows({}: Props): JSX.Element {
     const queryClient = useQueryClient();
     const [refreshing, setRefreshing] = useState(false);
-    const airingTodayResult = useQuery<TvShowsResponse>(
+    const airingTodayResult = useInfiniteQuery<TvShowsResponse>(
         ["tv", "airingToday"],
-        fetchers.tvShows.airingToday
+        fetchers.tvShows.airingToday,
+        { getNextPageParam }
     );
-    const topRatedResult = useQuery<TvShowsResponse>(
+    const topRatedResult = useInfiniteQuery<TvShowsResponse>(
         ["tv", "topRated"],
-        fetchers.tvShows.topRated
+        fetchers.tvShows.topRated,
+        { getNextPageParam }
     );
-    const trendingResult = useQuery<TvShowsResponse>(
+    const trendingResult = useInfiniteQuery<TvShowsResponse>(
         ["tv", "trending"],
-        fetchers.tvShows.trending
+        fetchers.tvShows.trending,
+        { getNextPageParam }
     );
 
     const loading =
@@ -47,15 +51,24 @@ function TvShows({}: Props): JSX.Element {
         >
             <MediaList
                 title="유행중인 TV 쇼"
-                data={trendingResult.data?.results}
+                data={trendingResult.data}
+                hasNextPage={trendingResult.hasNextPage}
+                fetchNextPage={trendingResult.fetchNextPage}
+                isFetchingNextPage={trendingResult.isFetchingNextPage}
             />
             <MediaList
                 title="방영할 TV 쇼"
-                data={airingTodayResult.data?.results}
+                data={airingTodayResult.data}
+                hasNextPage={airingTodayResult.hasNextPage}
+                fetchNextPage={airingTodayResult.fetchNextPage}
+                isFetchingNextPage={airingTodayResult.isFetchingNextPage}
             />
             <MediaList
                 title="높은 평점 TV 쇼"
-                data={topRatedResult.data?.results}
+                data={topRatedResult.data}
+                hasNextPage={topRatedResult.hasNextPage}
+                fetchNextPage={topRatedResult.fetchNextPage}
+                isFetchingNextPage={topRatedResult.isFetchingNextPage}
             />
         </ScrollView>
     );

@@ -10,8 +10,10 @@ import TvShows from "../screens/TvShows";
 import useDarkMode from "../hooks/useDarkMode";
 import { darkColors, lightColors } from "../themes/colors";
 import createTabBarIcon from "./createTabBarIcon";
+import { MainTabsParamList, RootScreenProps } from "./types";
 
-const Tabs = createBottomTabNavigator();
+type Props = RootScreenProps<"Tabs">;
+const Tabs = createBottomTabNavigator<MainTabsParamList>();
 
 const shadowOptions = {
     shadowOffset: {
@@ -24,7 +26,7 @@ const shadowOptions = {
     elevation: 15,
 };
 
-function MainTabs(): JSX.Element {
+function MainTabs({}: Props): JSX.Element {
     const theme = useTheme();
     const isDarkMode = useDarkMode();
 
